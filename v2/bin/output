@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -e
+
+pushd "$(dirname $0)/../alda/client" >/dev/null
+
+go run dev/note_timing/main.go "$@"
+
+popd >/dev/null
+
