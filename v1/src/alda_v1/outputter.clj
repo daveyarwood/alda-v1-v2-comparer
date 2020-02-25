@@ -3,6 +3,12 @@
             [clojure.math.numeric-tower :as math])
   (:import [alda.lisp.model.records Note]))
 
+(defn- handle-error
+  [x]
+  (if (instance? Throwable x)
+    (throw x)
+    x))
+
 (defn output
   [{:keys [events]}]
   (println "offset,duration,midi note")
@@ -18,4 +24,4 @@
                      midi-note))))
 
 (defn -main [filename]
-  (-> filename slurp parser/parse-input output))
+  (-> filename slurp parser/parse-input handle-error output))
