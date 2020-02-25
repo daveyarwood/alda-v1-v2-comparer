@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+set -e
+
+scriptdir="$(dirname $0)"
+
+normal=$(tput sgr0)
+bold=$(tput bold)
+black=$(tput setaf 0)
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+yellow=$(tput setaf 3)
+blue=$(tput setaf 4)
+magenta=$(tput setaf 5)
+cyan=$(tput setaf 6)
+white=$(tput setaf 7)
+
+function separator() {
+  echo
+  echo "--------------------------------------------------"
+  echo
+}
+
+function section() {
+  title="$1"
+  separator
+  echo "${bold}${yellow}$title${normal}"
+  echo
+}
+
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 SCORE_FILE"
+  exit 1
+fi
+
+score_file="$1"
+
+v1_output="$(mktemp)"
+v2_output="$(mktemp)"
+
+section "Setting up Alda v1 outputter..."
+"$scriptdir/../v1/bin/setup"
+
+section "Setting up Alda v2 outputter..."
+"$scriptdir/../v2/bin/setup"
+
+section "Collecting Alda v1 output..."
+"$scriptdir/../v1/bin/output" "$score_file" > "$v1_output" \
+  || (cat "$v1_output"; exit 1)
+
+section "Collecting Alda v2 output..."
+"$scriptdir/../v2/bin/output" "$score_file" > "$v2_output" \
+  || (cat "$v2_output"; exit 1)
+
+diff <(sort "$v1_output") <(sort "$v2_output")
