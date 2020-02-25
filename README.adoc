@@ -3,10 +3,10 @@
 == Background
 
 This is a tool that parses a score written for Alda v1, using both Alda v1 and
-v2, and outputs the offset and pitch of every note in the score in a standard
-format so that the two outputs can be diff'd. The goal is to ensure that if you
-play an Alda v1 score with Alda v2, the note timing won't be unexpectedly
-different.
+v2, and outputs the offset, duration, and pitch of every note in the score in a
+standard format so that the two outputs can be diff'd. The goal is to ensure
+that if you play an Alda v1 score with Alda v2, the note timing won't be
+unexpectedly different.
 
 == Notes
 
