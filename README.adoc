@@ -28,6 +28,8 @@ $ bin/compare-output /path/to/some-score.alda
 
 == TODO
 
+* Comparison script fixes up obsolete syntax in v1 scores
+** `key-signature` and `comment` invocations
 * Comparison script accepts multiple filenames on STDIN
 ** Run the v1 outputter in a persistent process to side-step long Clojure
 start-up time
