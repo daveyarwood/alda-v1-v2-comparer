@@ -1,0 +1,42 @@
+= Alda v1 vs. v2 output comparison tool
+
+== Background
+
+This is a tool that parses a score written for Alda v1, using both Alda v1 and
+v2, and outputs the offset and pitch of every note in the score in a standard
+format so that the two outputs can be diff'd. The goal is to ensure that if you
+play an Alda v1 score with Alda v2, the note timing won't be unexpectedly
+different.
+
+== Notes
+
+* This tool includes the relevant Alda code repositories as submodules and uses
+the latest commit on the right development branches (`master` for Alda v1,
+`v2` for Alda v2).
+
+* Alda v2 is mostly backwards compatible with Alda v1, with the exception of
+inline Clojure code, which is no longer supported. Alda v2 does have an inline
+Lisp that serves the same function, but the Lisp syntax is different from
+Clojure, so some Alda v1 scores need to be adjusted. This tool makes the
+necessary adjustments before parsing the score using Alda v2.
+
+== Usage
+
+**TODO**
+
+== TODO
+
+* Basic scaffolding w/ submodules
+* v1 outputter
+* v2 outputter
+* Comparison script that takes a single filename
+* Comparison script accepts multiple filenames on STDIN
+** Run the v1 outputter in a persistent process to side-step long Clojure
+start-up time
+* GitHub Alda score finder?
+
+== License
+
+Copyright © 2020 Dave Yarwood
+
+Distributed under the Eclipse Public License version 2.0.
