@@ -26,9 +26,6 @@ necessary adjustments before parsing the score using Alda v2.
 
 == TODO
 
-* Basic scaffolding w/ submodules
-* v1 outputter
-* v2 outputter
 * Comparison script that takes a single filename
 * Comparison script accepts multiple filenames on STDIN
 ** Run the v1 outputter in a persistent process to side-step long Clojure

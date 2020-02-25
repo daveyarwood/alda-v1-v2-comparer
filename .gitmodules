@@ -1,3 +1,6 @@
 [submodule "v2/alda"]
 	path = v2/alda
 	url = git@github.com:alda-lang/alda
+[submodule "v1/alda-core"]
+	path = v1/alda-core
+	url = git@github.com:alda-lang/alda-core
