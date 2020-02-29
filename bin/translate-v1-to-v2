@@ -1,0 +1,149 @@
+#!/usr/bin/env ruby
+
+if ARGV.size != 1
+  puts "This script translates an Alda v1 score into an Alda v2 score," \
+       "printing the translated score to STDOUT."
+  puts
+  puts "Alda v2 is mostly backwards compatible with Alda v1, with the"\
+       "exception of inline Clojure code, which is no longer supported. Alda" \
+       "v2 does have an inline Lisp that serves the same function, but the" \
+       "Lisp syntax is different from Clojure, so some Alda v1 scores need" \
+       "to be adjusted."
+  puts
+  puts "Usage: #{$0} SCORE_FILE"
+  exit 1
+end
+
+score_file = ARGV[0]
+
+# Monkey-patching the String class to give it state like a parser is weird, but
+# it totally works. Isn't Ruby great?
+class String
+  attr_accessor :i
+
+  def parse_clojure_wrapped_form(start_char, end_char)
+    # consume opening char
+    buffer = self[@i]
+    @i += 1
+
+    while @i < self.length && self[@i] != end_char
+      buffer << parse_clojure_form
+    end
+
+    if self[@i] == end_char
+      buffer << self[@i]
+      @i += 1
+    end
+
+    buffer
+  end
+
+  def parse_clojure_string
+    # consume initial "
+    buffer = self[@i]
+    @i += 1
+
+    while @i < self.length
+      case self[@i]
+      when '"'
+        # consume final " and we're done
+        buffer << self[@i]
+        @i += 1
+        break
+      when '\\'
+        # consume \ and whatever character comes next
+        buffer << self[@i..@i+1]
+        @i += 2
+      else
+        # consume a character that's part of the string
+        buffer << self[@i]
+        @i += 1
+      end
+    end
+
+    buffer
+  end
+
+  def parse_clojure_form
+    case self[@i]
+    when '('
+      parse_clojure_wrapped_form('(', ')')
+    when '['
+      parse_clojure_wrapped_form('[', ']')
+    when '{'
+      parse_clojure_wrapped_form('{', '}')
+    when '"'
+      parse_clojure_string
+    else
+      buffer = ""
+
+      while @i < self.length &&
+          !['(', ')', '[', ']', '{', '}', '"'].include?(self[@i])
+        buffer << self[@i]
+        @i += 1
+      end
+
+      buffer
+    end
+  end
+
+  def skip_comment_sexp
+    # consume open paren
+    @i += 1
+
+    while @i < self.length && self[@i] != ')'
+      parse_clojure_form
+    end
+
+    # consume close paren
+    if self[@i] == ')'
+      @i += 1
+    end
+
+    ""
+  end
+
+  def parse_sexp
+    if self[@i+1..@i+"comment".length] == "comment"
+      skip_comment_sexp
+    else
+      parse_clojure_wrapped_form('(', ')')
+    end
+  end
+
+  def remove_comment_sexps
+    output = ""
+    @i = 0
+
+    while @i < self.length
+      c = self[@i]
+      case
+      when c == '('
+        output << parse_sexp
+      else
+        output << c
+        @i += 1
+      end
+    end
+
+    output
+  end
+end
+
+puts \
+  File.read(score_file)
+  # (key-sig! [:g :minor]) => (key-sig! '(g minor))
+  .gsub(/(\((key-sig(nature)?!?) +\[(.*)\]\))/) {
+    key_sig_fn = $2
+    key_sig_args = $4.gsub(":", "")
+    "(#{key_sig_fn} '(#{key_sig_args}))"
+  }
+  # (key-signature {:e [:flat] :b [:flat]})
+  # => (key-signature '(e (flat) b (flat)))
+  .gsub(/(\((key-sig(nature)?!?) +\{(.*)\}\))/) {
+    key_sig_fn = $2
+    key_sig_args = $4.gsub(":", "").tr("[]", "()")
+    "(#{key_sig_fn} '(#{key_sig_args}))"
+  }
+  # remove (comment ...) forms
+  .remove_comment_sexps
