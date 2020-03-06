@@ -29,8 +29,6 @@ $ bin/compare-output /path/to/some-score.alda
 == TODO
 
 * Comparison script accepts multiple filenames on STDIN
-** Run the v1 outputter in a persistent process to side-step long Clojure
-start-up time
 * GitHub Alda score finder?
 
 == License

@@ -2,7 +2,10 @@
  :deps  {org.clojure/clojure            {:mvn/version "1.10.1"}
          org.clojure/core.async         {:mvn/version "0.3.443"}
          org.clojure/math.numeric-tower {:mvn/version "0.0.4"}
-         com.taoensso/timbre           {:mvn/version "4.10.0"}
-         djy                           {:mvn/version "0.1.4"}
-         potemkin                      {:mvn/version "0.4.4"}
-         clj_manifest                  {:mvn/version "0.2.0"}}}
+         com.taoensso/timbre            {:mvn/version "4.10.0"}
+         djy                            {:mvn/version "0.1.4"}
+         potemkin                       {:mvn/version "0.4.4"}
+         clj_manifest                   {:mvn/version "0.2.0"}
+         io.pedestal/pedestal.service   {:mvn/version "0.5.7"}
+         io.pedestal/pedestal.jetty     {:mvn/version "0.5.7"}
+         metosin/jsonista               {:mvn/version "0.2.5"}}}

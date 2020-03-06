@@ -2,9 +2,24 @@
 
 set -e
 
+if ! which jq >/dev/null; then
+  echo "This script requires jq to be on the PATH."
+  exit 1
+fi
+
 pushd "$(dirname $0)/../" >/dev/null
 
-clj -m alda-v1.outputter "$@"
+while read filename; do
+  output=$(mktemp)
+  curl -s "localhost:$(cat .v1-server-port)" -X POST -d "$filename" > "$output"
+
+  if [[ "$(jq -r '.["success?"]' "$output")" == "false" ]]; then
+    echo "Alda v1 outputter failed!"
+    exit 1
+  fi
+
+  cat "$output" <(echo)
+done
 
 popd >/dev/null
 

@@ -11,3 +11,24 @@ git checkout master
 git pull
 popd >/dev/null
 
+v1_server_port="$(ruby << EOF
+require "socket"
+puts Addrinfo.tcp("", 0).bind { |s| s.local_address.ip_port }
+EOF
+)"
+
+echo "Starting Alda v1 output server..."
+
+pushd "$(dirname $0)/../" >/dev/null
+echo "$v1_server_port" > .v1-server-port
+clj -m alda-v1.output-server "$v1_server_port" >/dev/null 2>/dev/null &
+popd >/dev/null
+
+while true; do
+  if curl -s "localhost:$v1_server_port" >/dev/null; then
+    echo "Alda v1 output server is up."
+    break
+  fi
+
+  sleep 1
+done

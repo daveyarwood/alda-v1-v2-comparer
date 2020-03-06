@@ -9,7 +9,7 @@
     (throw x)
     x))
 
-(defn output
+(defn score->output
   [{:keys [events]}]
   (println "offset,duration,midi note")
   (doseq [event events
@@ -23,5 +23,9 @@
                      (math/round duration)
                      midi-note))))
 
+(defn v1-output
+  [filename]
+  (-> filename slurp parser/parse-input handle-error score->output))
+
 (defn -main [filename]
-  (-> filename slurp parser/parse-input handle-error output))
+  (v1-output filename))
