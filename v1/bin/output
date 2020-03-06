@@ -7,19 +7,27 @@ if ! which jq >/dev/null; then
   exit 1
 fi
 
+if [[ $# -ne 1 ]]; then
+  echo "Usage: $0 FILENAME"
+  exit 1
+fi
+
+filename="$1"
+
 pushd "$(dirname $0)/../" >/dev/null
 
-while read filename; do
-  output=$(mktemp)
-  curl -s "localhost:$(cat .v1-server-port)" -X POST -d "$filename" > "$output"
 
-  if [[ "$(jq -r '.["success?"]' "$output")" == "false" ]]; then
-    echo "Alda v1 outputter failed!"
-    exit 1
-  fi
+output=$(mktemp)
+curl -s "localhost:$(cat .v1-server-port)" -X POST -d "$filename" > "$output"
 
-  cat "$output" <(echo)
-done
+if [[ "$(jq -r '.["success?"]' "$output")" == "false" ]]; then
+  echo "Alda v1 outputter failed!"
+  echo "$filename"
+  jq -r '.["error-message"]' "$output"
+  exit 1
+fi
+
+jq -r .output "$output"
 
 popd >/dev/null
 
