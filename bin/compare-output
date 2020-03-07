@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-set -e
-
 scriptdir="$(dirname $0)"
 
 normal=$(tput sgr0)
@@ -28,22 +26,55 @@ function section() {
   echo
 }
 
-if [[ $# -ne 1 ]]; then
-  echo "Usage: $0 SCORE_FILE"
-  exit 1
-fi
+function subsection() {
+  title="$1"
+  echo
+  echo "${bold}$title${normal}"
+  echo
+}
 
-v1_score_file="$1"
+function compare_output() {
+  local v1_score_file="$1"
 
-section "Adjusting Alda v1 score to be compatible with Alda v2..."
-v2_score_file="$(mktemp)"
-"$scriptdir/translate-v1-to-v2" "$v1_score_file" > "$v2_score_file" \
-  || (cat "$v1_output"; exit 1)
+  echo "${cyan}${bold}"
+  echo "=================================================================="
+  echo "$filename"
+  echo "=================================================================="
+  echo "${normal}"
 
-diff "$v1_score_file" "$v2_score_file" || true
+  subsection "Adjusting Alda v1 score to be compatible with Alda v2..."
+  local v2_score_file="$(mktemp)"
+  "$scriptdir/translate-v1-to-v2" "$v1_score_file" > "$v2_score_file" \
+    || (cat "$v1_output"; exit 1)
 
-v1_output="$(mktemp)"
-v2_output="$(mktemp)"
+  # Show a diff of v1 source vs. v2 source, as a sanity check.
+  diff "$v1_score_file" "$v2_score_file" || true
+
+  local v1_output="$(mktemp)"
+  local v2_output="$(mktemp)"
+
+  subsection "Collecting Alda v1 output..."
+  "$scriptdir/../v1/bin/output" "$v1_score_file" > "$v1_output"
+  if [[ $? -ne 0 ]]; then
+    cat <(echo "${bold}${red}") "$v1_output" <(echo "${normal}")
+    return
+  fi
+  echo "$v1_output"
+
+  subsection "Collecting Alda v2 output..."
+  "$scriptdir/../v2/bin/output" "$v2_score_file" > "$v2_output"
+  if [[ $? -ne 0 ]]; then
+    cat <(echo "${bold}${red}") "$v2_output" <(echo "${normal}")
+    return
+  fi
+  echo "$v2_output"
+
+  echo
+
+  # Show a diff of v1 vs. v2 output.
+  diff <(sort "$v1_output") <(sort "$v2_output") \
+    && echo "${bold}${green}same output${normal}"
+}
 
 section "Setting up Alda v1 outputter..."
 "$scriptdir/../v1/bin/setup"
@@ -51,12 +82,8 @@ section "Setting up Alda v1 outputter..."
 section "Setting up Alda v2 outputter..."
 "$scriptdir/../v2/bin/setup"
 
-section "Collecting Alda v1 output..."
-"$scriptdir/../v1/bin/output" "$v1_score_file" > "$v1_output" \
-  || (cat "$v1_output"; exit 1)
+section "Comparing v1 vs. v2 output..."
 
-section "Collecting Alda v2 output..."
-"$scriptdir/../v2/bin/output" "$v2_score_file" > "$v2_output" \
-  || (cat "$v2_output"; exit 1)
-
-diff <(sort "$v1_output") <(sort "$v2_output")
+while read filename; do
+  compare_output "$filename"
+done

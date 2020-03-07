@@ -16,7 +16,6 @@ filename="$1"
 
 pushd "$(dirname $0)/../" >/dev/null
 
-
 output=$(mktemp)
 curl -s "localhost:$(cat .v1-server-port)" -X POST -d "$filename" > "$output"
 
@@ -27,7 +26,7 @@ if [[ "$(jq -r '.["success?"]' "$output")" == "false" ]]; then
   exit 1
 fi
 
-jq -r .output "$output"
+jq -j .output "$output"
 
 popd >/dev/null
 

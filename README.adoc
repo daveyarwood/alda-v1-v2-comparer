@@ -22,13 +22,19 @@ necessary adjustments before parsing the score using Alda v2.
 
 == Usage
 
+`bin/compare-output` takes a stream of filenames on STDIN and compares the v1
+vs. v2 output for each file.
+
 ```bash
-$ bin/compare-output /path/to/some-score.alda
+# compare output for a single .alda file
+$ echo /path/to/some-score.alda | bin/compare-output
+
+# compare output for a directory containing .alda files
+$ find /path/to/some-directory/ -type f | bin/compare-output
 ```
 
 == TODO
 
-* Comparison script accepts multiple filenames on STDIN
 * GitHub Alda score finder?
 
 == License
