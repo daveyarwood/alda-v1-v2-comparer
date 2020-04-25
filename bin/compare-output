@@ -76,6 +76,11 @@ function compare_output() {
     && echo "${bold}${green}same output${normal}"
 }
 
+section "Initializing submodules..."
+pushd "$scriptdir/.." > /dev/null
+git submodule update --init
+popd > /dev/null
+
 section "Setting up Alda v1 outputter..."
 "$scriptdir/../v1/bin/setup"
 

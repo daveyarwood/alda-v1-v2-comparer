@@ -2,10 +2,6 @@
 
 set -e
 
-pushd "$(dirname $0)/../" >/dev/null
-git submodule init && git submodule update
-popd >/dev/null
-
 pushd "$(dirname $0)/../alda-core" >/dev/null
 git checkout master
 git pull
