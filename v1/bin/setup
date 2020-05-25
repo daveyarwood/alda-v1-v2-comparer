@@ -7,14 +7,13 @@ git checkout master
 git pull
 popd >/dev/null
 
+pushd "$(dirname "$0")/../" >/dev/null
+
 port_file=".v1-server-port"
 
 if [[ ! -f "$port_file" ]]; then
   echo "Starting Alda v1 output server..."
-
-  pushd "$(dirname "$0")/../" >/dev/null
   clj -m alda-v1.output-server >/dev/null 2>/dev/null &
-  popd >/dev/null
 fi
 
 # Wait for v1 server port file to appear.
@@ -34,3 +33,5 @@ while true; do
 
   sleep 1
 done
+
+popd >/dev/null
