@@ -14,7 +14,7 @@ fi
 
 filename="$1"
 
-pushd "$(dirname $0)/../" >/dev/null
+pushd "$(dirname "$0")/../" >/dev/null
 
 output=$(mktemp)
 curl -s "localhost:$(cat .v1-server-port)" -X POST -d "$filename" > "$output"

@@ -2,24 +2,30 @@
 
 set -e
 
-pushd "$(dirname $0)/../alda-core" >/dev/null
+pushd "$(dirname "$0")/../alda-core" >/dev/null
 git checkout master
 git pull
 popd >/dev/null
 
-v1_server_port="$(ruby << EOF
-require "socket"
-puts Addrinfo.tcp("", 0).bind { |s| s.local_address.ip_port }
-EOF
-)"
+port_file=".v1-server-port"
 
-echo "Starting Alda v1 output server..."
+if [[ ! -f "$port_file" ]]; then
+  echo "Starting Alda v1 output server..."
 
-pushd "$(dirname $0)/../" >/dev/null
-echo "$v1_server_port" > .v1-server-port
-clj -m alda-v1.output-server "$v1_server_port" >/dev/null 2>/dev/null &
-popd >/dev/null
+  pushd "$(dirname "$0")/../" >/dev/null
+  clj -m alda-v1.output-server >/dev/null 2>/dev/null &
+  popd >/dev/null
+fi
 
+# Wait for v1 server port file to appear.
+while [[ ! -f "$port_file" ]]; do
+  sleep 1
+done
+
+v1_server_port="$(cat "$port_file")"
+echo "$port_file says the server is running on port $v1_server_port."
+
+# Wait for curl to succeed.
 while true; do
   if curl -s "localhost:$v1_server_port" >/dev/null; then
     echo "Alda v1 output server is up."
